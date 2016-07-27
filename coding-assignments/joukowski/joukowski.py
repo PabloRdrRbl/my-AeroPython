@@ -61,8 +61,6 @@ def plot_plane(x, y, title=None):
 
     plt.scatter(x, y, s=0.5, c='k')
 
-    plt.scatter([x[0, 0], x[61, 0]], [y[0, 0], y[61, 0]], color='g')
-
     plt.axis('equal')
 
 
@@ -79,8 +77,6 @@ def plot_stream(x, y, psi, title=None):
 
     plt.contour(x, y, psi, colors='k',
                 levels=levels, linewidths=1, linestyles='solid')
-
-    plt.scatter([x[0, 0], x[61, 0]], [y[0, 0], y[61, 0]], color='g')
 
     plt.axis('equal')
 
