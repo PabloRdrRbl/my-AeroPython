@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 # Airfoil
 
-xc, yc = -0.15, 0
-R = 1.15
-
 c = 1
+
+xc, yc = -0.14, 0.0
+R = 1.15
 
 # Cylindrical grid
 
@@ -104,13 +104,14 @@ def plot_cp(x, y, cp, title=None):
 
     plt.title(title)
 
-    levels = np.linsspace(-2.0, 1.0, 100)
+    levels = np.linspace(-2.0, 1.0, 100)
     contf = plt.contourf(x, y, cp,
                          levels=levels, extend='both')
 
     cbar = plt.colorbar(contf)
     cbar.set_label('$C_p$', fontsize=16)
     cbar.ax.invert_yaxis()
+    cbar.set_ticks([-2.0, -1.0, 0.0, 1.0])
 
     plt.axis('equal')
 
