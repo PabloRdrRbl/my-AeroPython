@@ -5,8 +5,9 @@ import matplotlib.pyplot as plt
 # Airfoil
 
 c = 1
+AOA = 20
 
-xc, yc = -0.14, 0.0
+xc, yc = -0.15, 0
 R = 1.15
 
 # Cylindrical grid
@@ -25,6 +26,21 @@ Y = radial * np.sin(axial.reshape((Nth, 1))) + yc
 u_inf = 1
 
 # Functions
+
+
+def axis_rotation(x, y, xc, yc, AOA):
+    """
+    Originaly the cylinder is at (xc, yc), the axis
+    transformation moves it to the center
+    """
+
+# To radians
+    AOA = AOA * np.pi / 180
+
+    xp = (x - xc) * np.cos(AOA) + (y - yc) * np.sin(AOA)
+    yp = -(x - xc) * np.sin(AOA) + (y - yc) * np.cos(AOA)
+
+    return xp, yp
 
 
 def map_function(z, c):
@@ -120,13 +136,15 @@ if __name__ == '__main__':
 
     # Plot cylindrical grid
 
-    plot_plane(X, Y, title=r'$z-$plane')
+    Xr, Yr = axis_rotation(X, Y, xc, yc, AOA)
+
+    plot_plane(Xr, Yr, title=r'$z-$plane')
     plt.savefig('./images/z-plane.png')
     plt.close()
 
     # Conformal mapping
 
-    z = X + Y * 1j
+    z = X + Y * 1j  # xi is done with z, not z'
 
     xi = map_function(z, c)
 
@@ -137,19 +155,22 @@ if __name__ == '__main__':
     plt.close()
 
     # Doublet
+    # Doublet must be always placed at (0, 0),
+    # and computed in the z-plane, not z'.
+    # The same applies for the velocity
 
     kappa = 2 * np.pi * u_inf * R**2
 
-    u_doublet, v_doublet = get_velocity_doublet(kappa, xc, yc, X, Y)
+    u_doublet, v_doublet = get_velocity_doublet(kappa, 0, 0, Xr, Yr)
 
-    psi_doublet = get_stream_function_doublet(kappa, xc, yc, X, Y)
+    psi_doublet = get_stream_function_doublet(kappa, 0, 0, Xr, Yr)
 
     # Freestream
 
     u_freestream = u_inf * np.ones((Nth, Nr), dtype=float)
     v_freestream = np.zeros((Nth, Nr), dtype=float)
 
-    psi_freestream = u_inf * Y
+    psi_freestream = u_inf * Yr  # At z, not z'
 
     # Cylinder flow
 
@@ -171,7 +192,14 @@ if __name__ == '__main__':
 
     # Airfoil velocity
 
-    z = X + Y * 1j
+    # Velocity vectors need to be rotated back from the z' plane
+    # to the z plane
+    u_cylinder, v_cylinder = axis_rotation(
+        u_cylinder, v_cylinder, 0, 0, AOA)
+
+    z = X + Y * 1j  # xi is done using z not z'
+
+    xi = map_function(z, c)
 
     W = (u_cylinder - v_cylinder * 1j) / (1 - (c / z)**2)
 
@@ -204,6 +232,6 @@ if __name__ == '__main__':
 
     # Questions
 
-    print(kappa)
-    print(u_airfoil[61, 0], v_airfoil[61, 0])
-    print(cp_airfoil.min())
+    print(np.where(cp_airfoil[:, 0] == 1.0))
+    print(u_airfoil[49, 0], v_airfoil[49, 0])
+    print(cp_airfoil[74, 0])
