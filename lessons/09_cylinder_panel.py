@@ -162,3 +162,38 @@ plt.xlim(-1.0, 1.0)
 plt.ylim(-4.0, 2.0)
 
 plt.show()
+
+# Computational grid to calculate the
+# velocity field
+
+N = 80
+
+x = np.linspace(-2, 2, N)
+y = np.linspace(-2, 2, N)
+
+X, Y = np.meshgrid(x, y)
+
+
+def integral_x(p_i, p_j, X, Y):
+
+    def func(s, X, Y):
+
+        return (2 * (X - (p_j.xa - np.sin(p_j.beta) * s)) /
+                ((X - (p_j.xa - np.sin(p_j.beta)))**2 +
+                 (Y - (p_j.ya + np.cos(p_j.beta)))**2))
+
+    return integrate.quad(lambda s: func(s), 0.0, p_j.length)[0]
+
+
+def integral_y(p_i, p_j, X, Y):
+
+    def func(s, X, Y):
+
+        return (2 * (Y - (p_j.ya + np.cos(p_j.beta) * s)) /
+                ((X - (p_j.xa - np.sin(p_j.beta)))**2 +
+                 (Y - (p_j.ya + np.cos(p_j.beta)))**2))
+
+    return integrate.quad(lambda s: func(s), 0.0, p_j.length)[0]
+
+
+def get_velocity
