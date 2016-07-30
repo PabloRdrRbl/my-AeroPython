@@ -110,3 +110,55 @@ sigma = np.linalg.solve(A, b)
 
 for i, panel in enumerate(panels):
     panel.sigma = sigma[i]
+
+
+def integral_tangential(p_i, p_j):
+
+    def func(s):
+        return ((-(p_i.xc - (p_j.xa - np.sin(p_j.beta) * s)) *
+                 np.sin(p_i.beta) +
+                 (p_i.yc - (p_j.ya + np.cos(p_j.beta) * s)) *
+                 np.cos(p_i.beta)) /
+                ((p_i.xc - (p_j.xa - np.sin(p_j.beta) * s))**2 +
+                 (p_i.yc - (p_j.ya + np.cos(p_j.beta) * s))**2))
+
+    return integrate.quad(lambda s: func(s), 0., p_j.length)[0]
+
+A = np.empty((N_panels, N_panels), dtype=float)
+np.fill_diagonal(A, 0.0)
+
+for i, p_i in enumerate(panels):
+    for j, p_j in enumerate(panels):
+        if i != j:
+            A[i, j] = 0.5 / np.pi * integral_tangential(p_i, p_j)
+
+
+b = - u_inf * np.sin([panel.beta for panel in panels])
+
+vt = np.dot(A, sigma) + b
+
+for i, panel in enumerate(panels):
+    panel.vt = vt[i]
+
+for panel in panels:
+    panel.cp = 1.0 - (panel.vt / u_inf)**2
+
+
+cp_analytical = 1.0 - 4 * (y_cylinder / R)**2
+
+# plots the surface pressure coefficient
+plt.figure(figsize=(10, 6))
+plt.grid(True)
+plt.xlabel('x', fontsize=16)
+plt.ylabel('$C_p$', fontsize=16)
+plt.plot(x_cylinder, cp_analytical, color='b',
+         linestyle='-', linewidth=1, zorder=1)
+plt.scatter([p.xc for p in panels], [p.cp for p in panels],
+            color='#CD2305', s=40, zorder=2)
+plt.title('Number of panels : %d' % N_panels, fontsize=16)
+plt.legend(['analytical', 'source panel method'],
+           loc='best', prop={'size': 16})
+plt.xlim(-1.0, 1.0)
+plt.ylim(-4.0, 2.0)
+
+plt.show()
