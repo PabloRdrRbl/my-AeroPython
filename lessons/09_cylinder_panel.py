@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-form scipy import integrate
+from scipy import integrate
+
+import numba
+from numba import jit
 
 u_inf = 1
 
@@ -38,21 +41,21 @@ class Panel:
 
         self.length = np.sqrt((xb - xa)**2 + (yb - ya)**2)
 
-        # We are doing the panels counterclock-wise
+        # We are doing the panels counterclock-wise
         if xb - xa <= 0.0:
 
-            self.beta = np.acos((yb - ya) / self.length)
+            self.beta = np.arccos((yb - ya) / self.length)
 
         elif xb - xa > 0.0:
 
-            self.beta = np.pi + np.acos(-(yb - ya) / self.length)
+            self.beta = np.pi + np.arccos(-(yb - ya) / self.length)
 
         self.sigma = 0.0
         self.vt = 0.0
         self.cp = 0.0
 
 
-N_panels = 10                    # number of panels desired
+N_panels = 10
 
 # defining the end-points of the panels
 x_ends = R * np.cos(np.linspace(0, 2 * np.pi, N_panels + 1))
@@ -162,38 +165,3 @@ plt.xlim(-1.0, 1.0)
 plt.ylim(-4.0, 2.0)
 
 plt.show()
-
-# Computational grid to calculate the
-# velocity field
-
-N = 80
-
-x = np.linspace(-2, 2, N)
-y = np.linspace(-2, 2, N)
-
-X, Y = np.meshgrid(x, y)
-
-
-def integral_x(p_i, p_j, X, Y):
-
-    def func(s, X, Y):
-
-        return (2 * (X - (p_j.xa - np.sin(p_j.beta) * s)) /
-                ((X - (p_j.xa - np.sin(p_j.beta)))**2 +
-                 (Y - (p_j.ya + np.cos(p_j.beta)))**2))
-
-    return integrate.quad(lambda s: func(s), 0.0, p_j.length)[0]
-
-
-def integral_y(p_i, p_j, X, Y):
-
-    def func(s, X, Y):
-
-        return (2 * (Y - (p_j.ya + np.cos(p_j.beta) * s)) /
-                ((X - (p_j.xa - np.sin(p_j.beta)))**2 +
-                 (Y - (p_j.ya + np.cos(p_j.beta)))**2))
-
-    return integrate.quad(lambda s: func(s), 0.0, p_j.length)[0]
-
-
-def get_velocity
